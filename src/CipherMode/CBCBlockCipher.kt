@@ -2,28 +2,24 @@ package CipherMode
 
 import javax.crypto.spec.SecretKeySpec
 
-class ECBBlockCipher(private val key: SecretKeySpec, private val iv: ByteArray): AbstractBlockCipher(key, iv) {
+class CBCBlockCipher(private val  key: SecretKeySpec, private val iv: ByteArray) : AbstractBlockCipher(key, iv) {
     override fun processBlockEncrypt(data: ByteArray, isFinalBlock: Boolean, padding: String): ByteArray? {
         if (isFinalBlock){
-            val delta = key.encoded.size - data.size
+            val delta = this.key.encoded.size - data.size
             val paddingBytes = ByteArray(delta)
             for (i in 0..delta) {
                 paddingBytes.plus(delta.toByte())
             }
             data.plus(paddingBytes)
         }
-        this.lastBlock = blockCipherEncrypt(data)
-        return this.lastBlock
-    }
-
-    override fun processBlockDecrypt(data: ByteArray, isFinalBlock: Boolean, padding: String): ByteArray? {
-        if (isFinalBlock){
-            val delta = key.encoded.size - data.size
-            val paddingBytes = ByteArray(delta)
-            for (i in 0..delta) {
-                paddingBytes.plus(delta.toByte())
+        if (this.lastBlock == null){
+            for(i in 0..data.size){
+                data[i] = ((data[i].toInt() + iv[i].toInt()) % 2).toByte()
             }
-            data.plus(paddingBytes)
+        } else {
+            for(i in 0..data.size){
+                data[i] = ((data[i].toInt() + this.lastBlock!![i].toInt()) % 2).toByte()
+            }
         }
         this.lastBlock = blockCipherEncrypt(data)
         return this.lastBlock
@@ -44,6 +40,28 @@ class ECBBlockCipher(private val key: SecretKeySpec, private val iv: ByteArray):
         }
 
         return ciphertext
+    }
+
+    override fun processBlockDecrypt(data: ByteArray, isFinalBlock: Boolean, padding: String): ByteArray? {
+        if (isFinalBlock){
+            val delta = this.key.encoded.size - data.size
+            val paddingBytes = ByteArray(delta)
+            for (i in 0..delta) {
+                paddingBytes.plus(delta.toByte())
+            }
+            data.plus(paddingBytes)
+        }
+        if (this.lastBlock == null){
+            for(i in 0..data.size){
+                data[i] = ((data[i].toInt() + iv[i].toInt()) % 2).toByte()
+            }
+        } else {
+            for(i in 0..data.size){
+                data[i] = ((data[i].toInt() + this.lastBlock!![i].toInt()) % 2).toByte()
+            }
+        }
+        this.lastBlock = blockCipherDecrypt(data)
+        return this.lastBlock
     }
 
     override fun decrypt(data: ByteArray, iv: ByteArray?): ByteArray {

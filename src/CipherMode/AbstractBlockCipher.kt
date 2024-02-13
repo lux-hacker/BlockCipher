@@ -1,7 +1,6 @@
 package CipherMode
 
 import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 abstract class AbstractBlockCipher(private val key: SecretKeySpec, private val iv: ByteArray): BlockCipherable {
@@ -16,13 +15,5 @@ abstract class AbstractBlockCipher(private val key: SecretKeySpec, private val i
     fun blockCipherDecrypt(data: ByteArray): ByteArray? {
         cipher.init(Cipher.DECRYPT_MODE, this.key)
         return cipher.doFinal(data)
-    }
-
-    override fun encrypt(data: ByteArray, iv: ByteArray?): ByteArray? {
-
-    }
-
-    override fun decrypt(data: ByteArray, iv: ByteArray?): ByteArray? {
-        TODO("Not yet implemented")
     }
 }
