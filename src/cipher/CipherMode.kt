@@ -1,4 +1,4 @@
-package ciphermode
+package cipher
 
 enum class CipherMode {
     ECB,

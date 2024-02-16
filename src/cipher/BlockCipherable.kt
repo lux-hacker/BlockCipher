@@ -1,4 +1,4 @@
-package ciphermode
+package cipher
 
 interface BlockCipherable {
     fun processBlockEncrypt(

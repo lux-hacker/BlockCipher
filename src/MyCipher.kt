@@ -1,7 +1,7 @@
 import blockcipherexception.NotExistModeException
 import blockcipherexception.SmallKeySizeException
-import ciphermode.AbstractBlockCipher
-import ciphermode.ECBBlockCipher
+import cipher.AbstractBlockCipher
+import cipher.ECBBlockCipher
 import java.security.SecureRandom
 import javax.crypto.spec.SecretKeySpec
 
