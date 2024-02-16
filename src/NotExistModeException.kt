@@ -1,1 +1,0 @@
-class NotExistModeException(string: String): Exception(string)
