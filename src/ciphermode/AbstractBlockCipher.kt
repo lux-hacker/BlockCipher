@@ -1,4 +1,4 @@
-package CipherMode
+package ciphermode
 
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
@@ -22,7 +22,7 @@ abstract class AbstractBlockCipher(private val key: SecretKeySpec) : BlockCipher
         return cipher.doFinal(data)
     }
 
-    fun paddingData(data: ByteArray): ByteArray  {
+    fun paddingData(data: ByteArray): ByteArray {
         var copyData = data.clone()
         val delta = BLOCK_SIZE - data.size
         var paddingBytes = ByteArray(0)

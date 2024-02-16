@@ -1,4 +1,4 @@
-package CipherMode
+package ciphermode
 
 import javax.crypto.spec.SecretKeySpec
 

@@ -1,4 +1,4 @@
-package Units
+package units
 
 infix fun Byte.xor(x: Byte): Byte {
     val a = this.toInt()
