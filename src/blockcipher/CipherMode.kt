@@ -1,4 +1,4 @@
-package cipher
+package blockcipher
 
 enum class CipherMode {
     ECB,

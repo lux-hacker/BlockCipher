@@ -1,4 +1,4 @@
-package cipher
+package blockcipher
 
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
