@@ -8,14 +8,9 @@ class ECBBlockCipher(private val key: SecretKeySpec) : AbstractBlockCipher(key) 
         isFinalBlock: Boolean,
         padding: String,
     ): ByteArray? {
-        var copyData = data.clone()
+        var copyData: ByteArray = data
         if (isFinalBlock) {
-            val delta = BLOCK_SIZE - data.size
-            var paddingBytes = ByteArray(0)
-            for (i in 0..<delta) {
-                paddingBytes += delta.toByte()
-            }
-            copyData += paddingBytes
+            copyData = paddingData(data)
         }
         this.lastBlock = blockCipherEncrypt(copyData)
         return this.lastBlock
@@ -26,14 +21,6 @@ class ECBBlockCipher(private val key: SecretKeySpec) : AbstractBlockCipher(key) 
         isFinalBlock: Boolean,
         padding: String,
     ): ByteArray? {
-        if (isFinalBlock) {
-            val delta = data.size % BLOCK_SIZE
-            val paddingBytes = ByteArray(delta)
-            for (i in 0..delta) {
-                paddingBytes.plus(delta.toByte())
-            }
-            data.plus(paddingBytes)
-        }
         this.lastBlock = blockCipherDecrypt(data)
         return this.lastBlock
     }
@@ -42,7 +29,7 @@ class ECBBlockCipher(private val key: SecretKeySpec) : AbstractBlockCipher(key) 
         data: ByteArray,
         iv: ByteArray?,
     ): ByteArray {
-        var ciphertext: ByteArray = ByteArray(0)
+        var ciphertext = ByteArray(0)
         val s = BLOCK_SIZE
         var i = 0
         while (i + s < data.size) {
@@ -66,7 +53,7 @@ class ECBBlockCipher(private val key: SecretKeySpec) : AbstractBlockCipher(key) 
         data: ByteArray,
         iv: ByteArray?,
     ): ByteArray {
-        var plaintext: ByteArray = ByteArray(0)
+        var plaintext = ByteArray(0)
         val s = BLOCK_SIZE
         var i = 0
         while (i + s < data.size) {
