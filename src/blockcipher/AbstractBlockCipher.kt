@@ -8,7 +8,7 @@ abstract class AbstractBlockCipher(private val key: SecretKeySpec) : BlockCipher
     protected var lastBlock: ByteArray? = null
 
     companion object {
-        const val AES_KEY_SIZE = 32
+        val AES_KEY_SIZE = intArrayOf(16, 24, 32)
         const val BLOCK_SIZE = 16
     }
 
@@ -24,7 +24,8 @@ abstract class AbstractBlockCipher(private val key: SecretKeySpec) : BlockCipher
 
     fun paddingData(data: ByteArray): ByteArray {
         var copyData = data.clone()
-        val delta = BLOCK_SIZE - data.size
+        var delta = BLOCK_SIZE - data.size
+        delta = if (delta == 0) BLOCK_SIZE else delta
         var paddingBytes = ByteArray(0)
         for (i in 0..<delta) {
             paddingBytes += delta.toByte()
@@ -32,5 +33,62 @@ abstract class AbstractBlockCipher(private val key: SecretKeySpec) : BlockCipher
         copyData += paddingBytes
 
         return copyData
+    }
+
+    override fun encrypt(
+        data: ByteArray,
+        iv: ByteArray?,
+    ): ByteArray {
+        this.lastBlock = iv
+        var ciphertext = ByteArray(0)
+        val s = BLOCK_SIZE
+        var i = 0
+        while (i + s < data.size) {
+            val start = i
+            val end = i + s - 1
+            val newBlock = processBlockEncrypt(data.sliceArray(start..end), false, "PSC7")
+            if (newBlock != null) {
+                ciphertext += newBlock
+            }
+            i += s
+        }
+        val newBlock = processBlockEncrypt(data.sliceArray(i..<data.size), true, "PSC7")
+        if (newBlock != null) {
+            ciphertext += newBlock
+        }
+
+        return ciphertext
+    }
+
+    override fun decrypt(
+        data: ByteArray,
+        iv: ByteArray?,
+    ): ByteArray {
+        this.lastBlock = iv
+        var plaintext = ByteArray(0)
+        val s = BLOCK_SIZE
+        var i = 0
+        while (i + s < data.size) {
+            val start = i
+            val end = i + s - 1
+            val newBlock = processBlockDecrypt(data.sliceArray(start..end), false, "PSC7")
+            if (newBlock != null) {
+                plaintext += newBlock
+            }
+            i += s
+        }
+        if (i < data.size) {
+            val newBlock = processBlockDecrypt(data.sliceArray(i..<data.size), true, "PSC7")
+            if (newBlock != null) {
+                plaintext += newBlock
+            }
+        }
+        val pad = plaintext[plaintext.size - 1]
+        val paddingSlice = plaintext.sliceArray(plaintext.size - pad..<plaintext.size)
+        if (paddingSlice.isNotEmpty() && paddingSlice[0] == pad) {
+            plaintext = plaintext.sliceArray(0..<(plaintext.size - pad))
+        }
+
+        return plaintext
     }
 }

@@ -1,8 +1,9 @@
 package blockcipher
 
+import units.xor
 import javax.crypto.spec.SecretKeySpec
 
-class ECBBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
+class CBCBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
     override fun processBlockEncrypt(
         data: ByteArray,
         isFinalBlock: Boolean,
@@ -12,6 +13,9 @@ class ECBBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
         if (isFinalBlock) {
             copyData = paddingData(data)
         }
+
+        copyData = copyData xor this.lastBlock!!
+
         this.lastBlock = blockCipherEncrypt(copyData)
         return this.lastBlock
     }
@@ -20,8 +24,21 @@ class ECBBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
         data: ByteArray,
         isFinalBlock: Boolean,
         padding: String,
-    ): ByteArray? {
-        this.lastBlock = blockCipherDecrypt(data)
-        return this.lastBlock
+    ): ByteArray {
+        var plaintext = blockCipherDecrypt(data)
+
+        plaintext = plaintext!! xor this.lastBlock!!
+
+        this.lastBlock = data
+        return plaintext
+    }
+
+    override fun encrypt(
+        data: ByteArray,
+        iv: ByteArray?,
+    ): ByteArray {
+        var ciphertext = super.encrypt(data, iv)
+        ciphertext = iv!! + ciphertext
+        return ciphertext
     }
 }
