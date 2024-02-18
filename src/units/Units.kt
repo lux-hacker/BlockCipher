@@ -1,12 +1,14 @@
 package units
 
 import kotlin.experimental.xor
+import kotlin.math.min
 
 infix fun ByteArray.xor(x: ByteArray): ByteArray {
-    for (i in x.indices) {
-        this[i] = this[i] xor x[i]
+    val answer = ByteArray(min(this.size, x.size))
+    for (i in 0..<min(this.size, x.size)) {
+        answer[i] = this[i] xor x[i]
     }
-    return this
+    return answer
 }
 
 fun String.decodeHex(): ByteArray {

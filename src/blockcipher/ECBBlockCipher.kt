@@ -12,8 +12,9 @@ class ECBBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
         if (isFinalBlock) {
             copyData = paddingData(data)
         }
-        this.lastBlock = blockCipherEncrypt(copyData)
-        return this.lastBlock
+        val cipherBlock = blockCipherEncrypt(copyData)
+        lastBlock = if (isFinalBlock) null else cipherBlock
+        return cipherBlock
     }
 
     override fun processBlockDecrypt(
@@ -21,7 +22,8 @@ class ECBBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
         isFinalBlock: Boolean,
         padding: String,
     ): ByteArray? {
-        this.lastBlock = blockCipherDecrypt(data)
-        return this.lastBlock
+        val plainBlock = blockCipherDecrypt(data)
+        lastBlock = if (isFinalBlock) null else plainBlock
+        return plainBlock
     }
 }

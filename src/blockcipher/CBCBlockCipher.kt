@@ -16,8 +16,9 @@ class CBCBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
 
         copyData = copyData xor this.lastBlock!!
 
-        this.lastBlock = blockCipherEncrypt(copyData)
-        return this.lastBlock
+        val cipherBlock = blockCipherEncrypt(copyData)
+        lastBlock = if (isFinalBlock) null else cipherBlock
+        return cipherBlock
     }
 
     override fun processBlockDecrypt(
@@ -29,16 +30,7 @@ class CBCBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
 
         plaintext = plaintext!! xor this.lastBlock!!
 
-        this.lastBlock = data
+        this.lastBlock = if (isFinalBlock) null else data
         return plaintext
-    }
-
-    override fun encrypt(
-        data: ByteArray,
-        iv: ByteArray?,
-    ): ByteArray {
-        var ciphertext = super.encrypt(data, iv)
-        ciphertext = iv!! + ciphertext
-        return ciphertext
     }
 }

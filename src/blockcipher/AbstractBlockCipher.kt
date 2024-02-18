@@ -46,17 +46,17 @@ abstract class AbstractBlockCipher(private val key: SecretKeySpec) : BlockCipher
         while (i + s < data.size) {
             val start = i
             val end = i + s - 1
-            val newBlock = processBlockEncrypt(data.sliceArray(start..end), false, "PSC7")
+            val newBlock = processBlockEncrypt(data.sliceArray(start..end), false, "PKCS7")
             if (newBlock != null) {
                 ciphertext += newBlock
             }
             i += s
         }
-        val newBlock = processBlockEncrypt(data.sliceArray(i..<data.size), true, "PSC7")
+        val newBlock = processBlockEncrypt(data.sliceArray(i..<data.size), true, "PKCS7")
         if (newBlock != null) {
             ciphertext += newBlock
         }
-
+        ciphertext = if (iv != null) iv + ciphertext else ciphertext
         return ciphertext
     }
 
