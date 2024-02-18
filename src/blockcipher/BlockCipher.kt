@@ -21,7 +21,7 @@ class BlockCipher() {
             "ECB" -> this.mode = ECBBlockCipher(this.key)
             "CBC" -> this.mode = CBCBlockCipher(this.key)
             "CFB" -> this.mode = CFBBlockCipher(this.key)
-//            "OFB" -> this.mode = CipherMode.OFB
+            "OFB" -> this.mode = OFBBlockCipher(this.key)
 //            "CTR" -> this.mode = CipherMode.CTR
             else -> throw NotExistModeException("This mode is not supported")
         }

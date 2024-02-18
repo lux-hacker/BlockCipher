@@ -10,7 +10,7 @@ fun main() {
     val myCipher = BlockCipher()
 
     myCipher.setKey(key.toByteArray())
-    myCipher.setMode("CFB")
+    myCipher.setMode("OFB")
 
     val myCiphertext = myCipher.encrypt(plaintext.toByteArray(), null)
     println("Ciphertext: " + myCiphertext.toHexString())
