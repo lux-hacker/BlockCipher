@@ -26,7 +26,7 @@ class CTRBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
         isFinalBlock: Boolean,
         padding: String,
     ): ByteArray {
-        val gamma = blockCipherEncrypt(lastBlock!!)
+        var gamma = blockCipherEncrypt(lastBlock!!)
         var copyData = data
         if (isFinalBlock) {
             if (padding == "PKCS7") {
@@ -34,6 +34,14 @@ class CTRBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
             }
             lastBlock = null
         }
+        if (copyData.size == 2 * BLOCK_SIZE)
+            {
+                val cipherBlock1 = gamma!! xor copyData.sliceArray(0..<BLOCK_SIZE)
+                incNonce()
+                gamma = blockCipherEncrypt(lastBlock!!)
+                val cipherBlock2 = gamma!! xor copyData.sliceArray(BLOCK_SIZE..<2 * BLOCK_SIZE)
+                return cipherBlock1 + cipherBlock2
+            }
         val cipherBlock = gamma!! xor copyData
         if (!isFinalBlock) incNonce()
         return cipherBlock

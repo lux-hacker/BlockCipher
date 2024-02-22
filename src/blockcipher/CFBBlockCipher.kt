@@ -16,10 +16,20 @@ class CFBBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
             return newBlock
         } else if (padding == "PKCS7") {
             val copyData = paddingData(data)
-            val gamma = blockCipherEncrypt(lastBlock!!)
-            val newBlock = gamma!! xor copyData
-            lastBlock = null
-            return newBlock
+            if (copyData.size == BLOCK_SIZE * 2)
+                {
+                    val gamma1 = blockCipherEncrypt(lastBlock!!)
+                    val newBlock1 = gamma1!! xor copyData.sliceArray(0..<BLOCK_SIZE)
+                    val gamma2 = blockCipherEncrypt(newBlock1)
+                    val newBlock2 = gamma2!! xor copyData.sliceArray(BLOCK_SIZE..<2 * BLOCK_SIZE)
+                    lastBlock = null
+                    return newBlock1 + newBlock2
+                } else {
+                val gamma = blockCipherEncrypt(lastBlock!!)
+                val newBlock = gamma!! xor copyData
+                lastBlock = null
+                return newBlock
+            }
         } else {
             val gamma = blockCipherEncrypt(lastBlock!!)
             val newBlock = gamma!! xor data

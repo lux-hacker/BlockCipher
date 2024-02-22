@@ -12,9 +12,15 @@ class ECBBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
         if (isFinalBlock) {
             copyData = paddingData(data)
         }
-        val cipherBlock = blockCipherEncrypt(copyData)
-        lastBlock = if (isFinalBlock) null else cipherBlock
-        return cipherBlock
+        if (copyData.size != 2 * BLOCK_SIZE) {
+            val cipherBlock = blockCipherEncrypt(copyData)
+            lastBlock = if (isFinalBlock) null else cipherBlock
+            return cipherBlock
+        }
+        val cipherBlock1 = blockCipherEncrypt(copyData.sliceArray(0..<BLOCK_SIZE))
+        val cipherBlock2 = blockCipherEncrypt(copyData.sliceArray(BLOCK_SIZE..<2 * BLOCK_SIZE))
+        lastBlock = null
+        return cipherBlock1!! + cipherBlock2!!
     }
 
     override fun processBlockDecrypt(

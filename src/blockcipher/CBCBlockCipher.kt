@@ -13,12 +13,19 @@ class CBCBlockCipher(key: SecretKeySpec) : AbstractBlockCipher(key) {
         if (isFinalBlock) {
             copyData = paddingData(data)
         }
+        if (copyData.size != 2 * BLOCK_SIZE) {
+            copyData = copyData xor this.lastBlock!!
 
-        copyData = copyData xor this.lastBlock!!
-
-        val cipherBlock = blockCipherEncrypt(copyData)
-        lastBlock = if (isFinalBlock) null else cipherBlock
-        return cipherBlock
+            val cipherBlock = blockCipherEncrypt(copyData)
+            lastBlock = if (isFinalBlock) null else cipherBlock
+            return cipherBlock
+        }
+        val copyData1 = copyData.sliceArray(0..<BLOCK_SIZE) xor this.lastBlock!!
+        val cipherBlock1 = blockCipherEncrypt(copyData1)
+        val copyData2 = copyData.sliceArray(BLOCK_SIZE..<2 * BLOCK_SIZE) xor cipherBlock1!!
+        val cipherBlock2 = blockCipherEncrypt(copyData2)
+        lastBlock = null
+        return cipherBlock1!! + cipherBlock2!!
     }
 
     override fun processBlockDecrypt(
