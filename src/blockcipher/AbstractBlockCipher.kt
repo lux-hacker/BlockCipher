@@ -10,6 +10,9 @@ abstract class AbstractBlockCipher(private val key: SecretKeySpec) : BlockCipher
     companion object {
         val AES_KEY_SIZE = intArrayOf(16, 24, 32)
         const val BLOCK_SIZE = 16
+        const val NONCE_SIZE = 4
+        const val IV_SIZE = 8
+        const val COUNTER_SIZE = 4
     }
 
     fun blockCipherEncrypt(data: ByteArray): ByteArray? {
@@ -71,22 +74,25 @@ abstract class AbstractBlockCipher(private val key: SecretKeySpec) : BlockCipher
         while (i + s < data.size) {
             val start = i
             val end = i + s - 1
-            val newBlock = processBlockDecrypt(data.sliceArray(start..end), false, "PSC7")
+            val newBlock = processBlockDecrypt(data.sliceArray(start..end), false, "PKCS7")
             if (newBlock != null) {
                 plaintext += newBlock
             }
             i += s
         }
         if (i < data.size) {
-            val newBlock = processBlockDecrypt(data.sliceArray(i..<data.size), true, "PSC7")
+            val newBlock = processBlockDecrypt(data.sliceArray(i..<data.size), true, "PKCS7")
             if (newBlock != null) {
                 plaintext += newBlock
             }
         }
-        val pad = plaintext[plaintext.size - 1]
-        val paddingSlice = plaintext.sliceArray(plaintext.size - pad..<plaintext.size)
-        if (paddingSlice.isNotEmpty() && paddingSlice[0] == pad) {
-            plaintext = plaintext.sliceArray(0..<(plaintext.size - pad))
+
+        if (plaintext[plaintext.size - 1] == plaintext[plaintext.size - 2]) {
+            val pad = plaintext[plaintext.size - 1]
+            val paddingSlice = plaintext.sliceArray(plaintext.size - pad..<plaintext.size)
+            if (paddingSlice.isNotEmpty() && paddingSlice[0] == pad) {
+                plaintext = plaintext.sliceArray(0..<(plaintext.size - pad))
+            }
         }
 
         return plaintext

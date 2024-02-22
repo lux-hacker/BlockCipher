@@ -22,14 +22,14 @@ class BlockCipher() {
             "CBC" -> this.mode = CBCBlockCipher(this.key)
             "CFB" -> this.mode = CFBBlockCipher(this.key)
             "OFB" -> this.mode = OFBBlockCipher(this.key)
-//            "CTR" -> this.mode = CipherMode.CTR
+            "CTR" -> this.mode = CTRBlockCipher(this.key)
             else -> throw NotExistModeException("This mode is not supported")
         }
     }
 
-    private fun generateIV(): ByteArray {
+    private fun generateIV(size: Int): ByteArray {
         val secureRandom = SecureRandom.getInstanceStrong()
-        val iv = ByteArray(AbstractBlockCipher.BLOCK_SIZE)
+        val iv = ByteArray(size)
         secureRandom.nextBytes(iv)
         return iv
     }
@@ -39,7 +39,15 @@ class BlockCipher() {
         iv: ByteArray?,
     ): ByteArray {
         if (iv == null) {
-            val newIv = generateIV()
+            var newIv: ByteArray
+            if (this.mode !is CTRBlockCipher) {
+                newIv = generateIV(AbstractBlockCipher.BLOCK_SIZE)
+            } else {
+                newIv = generateIV(AbstractBlockCipher.NONCE_SIZE)
+                for (i in 0..<(AbstractBlockCipher.BLOCK_SIZE - AbstractBlockCipher.NONCE_SIZE)) {
+                    newIv += 0
+                }
+            }
             return this.mode.encrypt(data, newIv)
         }
         return this.mode.encrypt(data, iv)
